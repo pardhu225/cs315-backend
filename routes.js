@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-let tokenMiddleware = require("../middlewares/any-user-auth");
+const userController = require('./controllers/user-controller');
 
-router.get('', queryController.get_content);
+let authMiddlewares = require("./middlewares/auth");
 
-router.post('/hospitality', tokenMiddleware, contentControl('POST', 'hospitality'));
+router.post('/api/user/register/student', userController.registerStudent);
+
+router.post('/api/user/student/me', authMiddlewares.usersOnly, userController.getStudentDetails);
 
 module.exports = router;

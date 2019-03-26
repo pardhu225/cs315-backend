@@ -6,7 +6,6 @@ const fs = require('fs');
 const cparser = require('cookie-parser');
 const cors = require('cors');
 
-const session = require("express-session");
 //Config
 let config = require("./config");
 
