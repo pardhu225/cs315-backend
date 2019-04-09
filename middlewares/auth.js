@@ -8,7 +8,6 @@ admin.initializeApp({
 });
 
 module.exports.usersOnly = (req, res, next) => {
-    console.log(req.headers);
     let token = req.headers['Authorization'] || req.headers['authorization'];
     if (!token) {
         console.log('Empty auth header');
@@ -37,6 +36,7 @@ module.exports.facultyOnly = (req, res, next) => {
 
 // usersOnly has to be called before this can be called
 module.exports.studentOnly = (req, res, next) => {
+    console.log('checking', req.user.uid);
     util.isFaculty(req.user.uid, "uid").then(ans => {
         if (ans === false)
             next();

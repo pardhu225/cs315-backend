@@ -2,6 +2,76 @@
 var admin = require('firebase-admin');
 var db = require('../db');
 
+updateStudentProps = [
+    {
+        prop: 'name',
+        validator: (val) => true
+    },
+    {
+        prop: 'address',
+        validator: (val) => true
+    },
+    {
+        prop: 'marital_status',
+        validator: (val) => true
+    },
+    {
+        prop: 'date_of_birth',
+        validator: (val) => true
+    },
+    {
+        prop: 'mobile_1',
+        validator: (val) => true
+    },
+    {
+        prop: 'mobile_2',
+        validator: (val) => true
+    },
+    {
+        prop: 'alternate_email',
+        validator: (val) => true
+    },
+    {
+        prop: 'hostel',
+        validator: (val) => true
+    },
+    {
+        prop: 'room',
+        validator: (val) => true
+    },
+    {
+        prop: 'father_name',
+        validator: (val) => true
+    },
+    {
+        prop: 'mother_name',
+        validator: (val) => true
+    },
+    {
+        prop: 'father_mobile_1',
+        validator: (val) => true
+    },
+    {
+        prop: 'mother_mobile_1',
+        validator: (val) => true
+    },
+    {
+        prop: 'father_mobile_2',
+        validator: (val) => true
+    },
+    {
+        prop: 'mother_mobile_2',
+        validator: (val) => true
+    },
+    {
+        prop: 'father_email',
+        validator: (val) => true
+    },
+    {
+        prop: 'mother_email',
+        validator: (val) => true
+    },
+];
 /**
  * This function for registering a student on the site.
  * First create the user on the firebase, then create on our database, then send the
@@ -14,7 +84,7 @@ exports.registerStudent = (req, res) => {
     }
 
     db.conn().query(`SELECT * FROM student WHERE email="${req.body.username}@iitk.ac.in"`)
-        .then(function(r) {
+        .then(function (r) {
             if (r.length === 0) {
                 res.status(401).json({ message: 'User does not exist. Have you registered yourself first?' });
                 return;
@@ -151,4 +221,53 @@ exports.getUserDetails = (req, res) => {
                     });
             }
         });
+};
+
+/**
+ * This function for registering a faculty on the site.
+ * First create the user on the firebase, then create on our database, then send the
+ * verification email
+ */
+exports.updateStudent = (req, res) => {
+    let valid = true;
+    updateStudentProps.forEach(e => {
+        if (!e.validator(req.body[e.prop])) {
+            console.log(req.body[e.prop], e.validator(req.body[e.prop]), e.prop);
+            valid = false;
+        }
+    });
+    if (!valid) {
+        res.status(401).json({ message: 'Malformed request data' });
+        return;
+    }
+    let d = new Date(req.body.date_of_birth);
+
+    db.conn().query(
+        `UPDATE student SET 
+            name = '${req.body.name}',
+            address = '${req.body.address}',
+            marital_status = '${req.body.marital_status}',
+            date_of_birth = '${d.getFullYear()}-${d.getMonth() + 1}-${d.getDay() + 1}',
+            mobile_1 = '${req.body.mobile_1}',
+            mobile_2 = '${req.body.mobile_2}',
+            alternate_email = '${req.body.alternate_email}',
+            hostel = '${req.body.hostel}',
+            room = '${req.body.room}',
+            father_name = '${req.body.father_name}',
+            mother_name = '${req.body.mother_name}',
+            father_mobile_1 = '${req.body.father_mobile_1}',
+            mother_mobile_1 = '${req.body.mother_mobile_1}',
+            father_mobile_2 = '${req.body.father_mobile_2}',
+            mother_mobile_2 = '${req.body.mother_mobile_2}',
+            father_email = '${req.body.father_email}',
+            mother_email = '${req.body.mother_email}'
+            WHERE uid="${req.user.uid}"`
+    )
+    .then(r => {
+        res.status(200).json({ message: 'Student updated successfully' });
+    })
+    .catch(function (error) {
+        console.log("\tError updating student:", error);
+        res.status(400).json({ message: error.message });
+    });
 };
