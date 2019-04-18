@@ -14,6 +14,8 @@ router.post('/api/user/me', authMiddlewares.usersOnly, userController.getUserDet
 router.put('/api/student/update', authMiddlewares.usersOnly, authMiddlewares.studentOnly, userController.updateStudent);
 // router.put('/api/faculty/update', authMiddlewares.usersOnly, authMiddlewares.facultyOnly, userController.updateFaculty);
 
+router.get('/api/student/courses-this-sem', authMiddlewares.usersOnly, authMiddlewares.studentOnly, coursesController.thisSemCourses);
+
 router.post('/api/all-courses', authMiddlewares.usersOnly, coursesController.getCourses);
 
 module.exports = router;
