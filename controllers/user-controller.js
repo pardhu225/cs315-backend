@@ -271,3 +271,22 @@ exports.updateStudent = (req, res) => {
         res.status(400).json({ message: error.message });
     });
 };
+
+
+/**
+ * This function returns personal details of students
+ */
+exports.personalDetails = (req, res) => {
+    var sql = 
+            `
+            SELECT address,email,gender,CPI,name ,department,batch,programme
+            FROM student 
+            WHERE uid = "${req.user.id}"`
+    ;
+    db.conn().query(sql)
+      .then(r => res.status(200).json(r))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to push the complaint'});
+          console.log(e);
+      });
+};

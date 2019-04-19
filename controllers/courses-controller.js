@@ -41,3 +41,99 @@ exports.thisSemCourses = (req, res) => {
 /**
  * This function adds a course to register for students
  */
+
+exports.addCourses = (req, res) => {
+    var sql = `
+                UPDATE student_course_registration 
+                SET status='Accepted'
+                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+    `;
+    db.conn().query(sql)
+      .then(r => res.status(200).json("course accepted"))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to fetch the courses'});
+          console.log(e);
+      });
+};
+
+/**
+ * This function drop a course to register for students
+ */
+
+exports.dropCourses = (req, res) => {
+    var sql = `
+                UPDATE student_course_registration 
+                SET status='Dropped'
+                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}";
+    `;
+    db.conn().query(sql)
+      .then(r => res.status(200).json("course dropped"))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to fetch the courses'});
+          console.log(e);
+      });
+};
+
+/**
+ * This function rejects a course to register for students
+ */
+
+exports.rejectedCourses = (req, res) => {
+    var sql = `
+                UPDATE student_course_registration 
+                SET status='Rejected'
+                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+    `;
+    db.conn().query(sql)
+      .then(r => res.status(200).json("course rejected"))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to fetch the courses'});
+          console.log(e);
+      });
+};
+/**
+ * This function rejects a course to register for students
+ */
+
+exports.facultyCourses = (req, res) => {
+var sql = `SELECT course.code,
+                      course.title,
+                      course_offering.offering_id,
+                      faculty_course_registration.taking_as,
+                FROM
+                      course,
+                      course_offering,
+                      faculty_course_registration
+                WHERE
+                      course_offering.coursecode = course.code AND 
+                      faculty_course_registration.uid = "${req.user.uid}" AND
+                      course_offering.year = ${new Date().getFullYear()} AND
+                      course_offering.half = "${new Date().getMonth() < 6? 'even' : 'odd'}" AND
+                      faculty_course_registration.offering_id = course_offering.offering_id`;
+                      
+    db.conn().query(sql)
+    .then(r => res.status(200).json("course rejected"))
+    .catch(e => {
+        res.status(500).json({message: 'Unable to fetch the courses'});
+        console.log(e);
+    });
+};
+
+
+/*
+ * This function adds a course to register for students
+ */
+
+exports.addCourses = (req, res) => {
+    var sql = `
+                UPDATE student_course_registration 
+                SET status='Accepted'
+                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+    `;
+    db.conn().query(sql)
+      .then(r => res.status(200).json("course accepted"))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to fetch the courses'});
+          console.log(e);
+      });
+};

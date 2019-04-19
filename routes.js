@@ -18,4 +18,24 @@ router.get('/api/student/courses-this-sem', authMiddlewares.usersOnly, authMiddl
 
 router.post('/api/all-courses', authMiddlewares.usersOnly, coursesController.getCourses);
 
+router.post('/api/push-complaint', authMiddlewares.usersOnly, coursesController.complaintPush);
+
+router.post('/api/complaint-complete', authMiddlewares.usersOnly, coursesController.complaintPush);
+
+router.post('/api/hall-dues', authMiddlewares.usersOnly, coursesController.dues);
+
+router.post('/api/personal-details', authMiddlewares.usersOnly, coursesController.personalDetails);
+
+router.post('/api/leave-request', authMiddlewares.usersOnly, coursesController.leaveRequest);
+
+router.post('/api/leave-accepted', authMiddlewares.usersOnly, coursesController.leaveAccepted);
+
+router.post('/api/leave-denied', authMiddlewares.usersOnly, coursesController.leaveDenied);
+
+router.post('/api/course-dropped', authMiddlewares.usersOnly, coursesController.dropCourses);
+
+router.post('/api/course-accepted', authMiddlewares.usersOnly, coursesController.addCourses);
+
+router.post('/api/course-rejected', authMiddlewares.usersOnly, coursesController.rejectedCourses);
+
 module.exports = router;
