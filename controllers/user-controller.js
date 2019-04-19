@@ -209,6 +209,7 @@ exports.getUserDetails = (req, res) => {
 
                 Promise.all(promises)
                     .then((results) => {
+                        console.log(results);
                         res.status(200).json({
                             courses: results[0],
                             userDetails: results[1][0],
@@ -260,7 +261,8 @@ exports.updateStudent = (req, res) => {
             father_mobile_2 = '${req.body.father_mobile_2}',
             mother_mobile_2 = '${req.body.mother_mobile_2}',
             father_email = '${req.body.father_email}',
-            mother_email = '${req.body.mother_email}'
+            mother_email = '${req.body.mother_email}',
+            Income = ${req.body.Income}
             WHERE uid="${req.user.uid}"`
     )
     .then(r => {
