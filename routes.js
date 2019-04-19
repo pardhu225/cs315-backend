@@ -18,7 +18,7 @@ router.put('/api/student/update', authMiddlewares.usersOnly, authMiddlewares.stu
 router.get('/api/student/courses-this-sem', authMiddlewares.usersOnly, authMiddlewares.studentOnly, coursesController.thisSemCourses);
 router.post('/api/student/request-course', authMiddlewares.usersOnly, authMiddlewares.studentOnly, coursesController.requestCourse);
 
-router.get('/api/faculty/courses-this-sem', authMiddlewares.usersOnly, authMiddlewares.facultyOnly, coursesController.thisSemCourses);
+router.get('/api/faculty/courses-this-sem', authMiddlewares.usersOnly, authMiddlewares.facultyOnly, coursesController.thisSemFacCourses);
 
 router.post('/api/all-courses', authMiddlewares.usersOnly, coursesController.getCourses);
 router.get('/api/student/all-courses-this-sem', authMiddlewares.usersOnly, coursesController.thisSemAllCourses);
@@ -30,6 +30,11 @@ router.post('/api/push-complaint', authMiddlewares.usersOnly, adminController.co
 router.post('/api/complaint-history', authMiddlewares.usersOnly, adminController.complaintHistory);
 router.post('/api/complaint-complete', authMiddlewares.usersOnly, adminController.complaintCompleted);
 
+router.post('/api/faculty/course-dropped', authMiddlewares.usersOnly, coursesController.dropCourses);
+router.post('/api/faculty/course-accepted', authMiddlewares.usersOnly, coursesController.addCourses);
+router.post('/api/faculty/course-rejected', authMiddlewares.usersOnly, coursesController.rejectedCourses);
+router.post('/api/faculty/current-students', authMiddlewares.usersOnly, coursesController.currentStudents);
+
 router.post('/api/hall-dues', authMiddlewares.usersOnly, adminController.dues);
 
 router.post('/api/personal-details', authMiddlewares.usersOnly, userController.personalDetails);
@@ -40,10 +45,5 @@ router.post('/api/leave-accepted', authMiddlewares.usersOnly, adminController.le
 
 router.post('/api/leave-denied', authMiddlewares.usersOnly, adminController.leaveDenied);
 
-router.post('/api/course-dropped', authMiddlewares.usersOnly, coursesController.dropCourses);
-
-router.post('/api/course-accepted', authMiddlewares.usersOnly, coursesController.addCourses);
-
-router.post('/api/course-rejected', authMiddlewares.usersOnly, coursesController.rejectedCourses);
 
 module.exports = router;

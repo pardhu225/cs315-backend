@@ -40,8 +40,20 @@ exports.thisSemCourses = (req, res) => {
       });
 };
 exports.thisSemFacCourses = (req, res) => {
-    // TODO this
-    var sql = ``;
+    var sql = `SELECT course.code,
+                      course.title,
+                      course_offering.offering_id,
+                      faculty_course_registration.taking_as
+                FROM
+                      course,
+                      course_offering,
+                      faculty_course_registration
+                WHERE
+                      course_offering.coursecode = course.code AND 
+                      faculty_course_registration.uid = "${req.user.uid}" AND
+                      course_offering.year = ${new Date().getFullYear()} AND
+                      course_offering.half = "${new Date().getMonth() < 6? 'even' : 'odd'}" AND
+                      faculty_course_registration.offering_id = course_offering.offering_id`;
     db.conn().query(sql)
       .then(r => res.status(200).json(r))
       .catch(e => {
@@ -275,7 +287,7 @@ exports.thisSemAllCourses = (req, res) => {
                     course_prerequisite
                 WHERE
                     course_offering.coursecode = course.code AND
-                    year = 2019 AND half = 1 AND
+                    year = ${new Date().getFullYear()} AND half = '${new Date().getMonth() < 6 ? 'even' : 'or'}' AND
                     course_prerequisite.course = course_offering.coursecode;`;
 
     db.conn().query(sql)
@@ -394,4 +406,26 @@ exports.addCourses = (req, res) => {
           res.status(500).json({message: 'Unable to fetch the courses'});
           console.log(e);
       });
+};
+
+exports.currentStudents = (req, res ) => {
+    var sql = `
+            SELECT
+                student.name, student.roll_no, student.CPI, student.department
+            FROM
+                student, course_offering, student_course_registration,
+                faculty_course_registration, faculty
+            WHERE
+                course_offering.offering_id = student_course_registration.offering_id AND
+                course_offering.offering_id = faculty_course_registration.offering_id AND
+                student.uid = student_course_registration.uid AND
+                faculty.uid = faculty_course_registration.uid AND
+                course_offering.year = ${new Date().getFullYear()} AND
+                course_offering.half = '${new Date().getDate() < 6 ? 'even' : 'odd'}'`;
+    db.conn().query(sql)
+        .then(r => res.status(200).json(r))
+        .catch(e => {
+            res.status(500).json({message: 'Unable to fetch the courses'});
+            console.log(e);
+        });
 };
