@@ -27,8 +27,8 @@ router.post('/api/faculty/create-offering', authMiddlewares.usersOnly, authMiddl
 router.post('/api/faculty/register-as-tutor', authMiddlewares.usersOnly, authMiddlewares.facultyOnly, coursesController.registerAsTutor);
 
 router.post('/api/push-complaint', authMiddlewares.usersOnly, adminController.complaintPush);
-
-router.post('/api/complaint-complete', authMiddlewares.usersOnly, adminController.complaintPush);
+router.post('/api/complaint-history', authMiddlewares.usersOnly, adminController.complaintHistory);
+router.post('/api/complaint-complete', authMiddlewares.usersOnly, adminController.complaintCompleted);
 
 router.post('/api/hall-dues', authMiddlewares.usersOnly, adminController.dues);
 

@@ -6,8 +6,8 @@ var db = require('../db');
 exports.complaintPush = (req, res) => {
     var sql = 
             `
-                INSERT INTO complaints(uid,complaint,complaint_type,complaint_status,location)
-                VALUES ("${req.user.uid}","${req.body.complaint}","${req.body.complaint_type}","pending","${req.body.location}");
+                INSERT INTO complaints(uid,complaint,complaint_type,complaint_status,location, complaint_title)
+                VALUES ("${req.user.uid}","${req.body.complaint}","${req.body.complaint_type}","pending","${req.body.location}", "${req.body.complaint_title}");
             `
     ;
     db.conn().query(sql)
@@ -17,8 +17,23 @@ exports.complaintPush = (req, res) => {
           console.log(e);
       });
 };
-
-
+/**
+ * complaint history
+ */
+exports.complaintHistory = (req, res) => {
+    var sql =   `SELECT
+                    *
+                FROM
+                    complaints
+                WHERE
+                    uid = "${req.user.uid}";`;
+    db.conn().query(sql)
+      .then(r => res.status(200).json(r))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to push the complaint'});
+          console.log(e);
+      });
+};
 /**
  * This function after complaint is completed
  */
@@ -41,13 +56,17 @@ exports.complaintCompleted = (req, res) => {
  * This function for hall dues
  */
 exports.dues = (req, res) => {
-    var sql = 
-            `SELECT hall_number,mess_dues,electricity_dues,other_dues
-            FROM hall_admin 
-            WHERE uid = "${req.user.id}"`
-    ;
+    var sql =  `SELECT
+                    hall_number,
+                    mess_dues,
+                    electricity_dues,
+                    other_dues
+                FROM
+                    hall_admin 
+                WHERE
+                    uid = "${req.user.uid}"`;
     db.conn().query(sql)
-      .then(r => res.status(200).json("r"))
+      .then(r => res.status(200).json(r))
       .catch(e => {
           res.status(500).json({message: 'Unable to push the complaint'});
           console.log(e);

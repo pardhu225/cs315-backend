@@ -283,7 +283,7 @@ exports.personalDetails = (req, res) => {
             `
             SELECT address,email,gender,CPI,name ,department,batch,programme
             FROM student 
-            WHERE uid = "${req.user.id}"`
+            WHERE uid = "${req.user.uid}"`
     ;
     db.conn().query(sql)
       .then(r => res.status(200).json(r))
