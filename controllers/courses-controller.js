@@ -86,12 +86,15 @@ exports.dropCourse = (req, res) => {
                 SET
                     status = "drop (requested)"
                 WHERE
-                    uid  = "${req.body.student_uid}" AND
+                    uid  = "${req.user.uid}" AND
                     offering_id = ${req.body.offering_id} AND
                     status = "accepted";
     `;
     db.conn().query(sql)
-      .then(r => res.status(200).json({message: 'Course successfully requested'}))
+      .then(r => {
+          res.status(200).json({message: 'Course successfully requested'});
+          console.log(r)
+        })
       .catch(e => {
           res.status(500).json({message: 'Unable to request the course the courses'});
           console.log(e);
@@ -101,9 +104,9 @@ exports.withdrawCourse = (req, res) => {
     var sql = ` DELETE FROM
                     student_course_registration
                 WHERE
-                    uid  = "${req.body.student_uid}" AND
+                    uid = "${req.user.uid}" AND
                     offering_id = ${req.body.offering_id} AND
-                    status == "requested";
+                    status = "waiting";
     `;
     db.conn().query(sql)
       .then(r => res.status(200).json({message: 'Course successfully requested'}))
@@ -172,9 +175,9 @@ exports.acceptDropCourse = (req, res) => {
     var sql = ` UPDATE
                     student_course_registration
                 SET
-                    status = "ask to meet"
+                    status = "drop (accepted)"
                 WHERE
-                    uid  = "${req.user.student_uid}" AND
+                    uid  = "${req.body.uid}" AND
                     offering_id = ${req.body.offering_id} AND
                     status = "drop (requested)";
     `;
@@ -189,9 +192,9 @@ exports.rejectDropCourse = (req, res) => {
     var sql = ` UPDATE
                     student_course_registration
                 SET
-                    status = "accepted"
+                    status = "drop (rejected)"
                 WHERE
-                    uid  = "${req.user.student_uid}" AND
+                    uid  = "${req.body.uid}" AND
                     offering_id = ${req.body.offering_id} AND
                     status = "drop (requested)";
     `;
@@ -227,7 +230,7 @@ exports.addCourses = (req, res) => {
 exports.dropCourses = (req, res) => {
     var sql = `
                 UPDATE student_course_registration 
-                SET status='Dropped'
+                SET status='drop (requested)'
                 WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}";
     `;
     db.conn().query(sql)
@@ -280,15 +283,13 @@ exports.thisSemAllCourses = (req, res) => {
                     title,
                     lecture_credits,
                     tutorial_credits,
-                    prerequisite
+                    year, half
                 FROM
                     course_offering,
-                    course,
-                    course_prerequisite
+                    course
                 WHERE
                     course_offering.coursecode = course.code AND
-                    year = ${new Date().getFullYear()} AND half = '${new Date().getMonth() < 6 ? 'even' : 'or'}' AND
-                    course_prerequisite.course = course_offering.coursecode;`;
+                    year = ${new Date().getFullYear()} AND half = '${new Date().getMonth() < 6 ? 'even' : 'odd'}';`;
 
     db.conn().query(sql)
     .then(r => res.status(200).json(r))
@@ -304,19 +305,19 @@ exports.thisSemAllCourses = (req, res) => {
 exports.rejectedCourses = (req, res) => {
     var sql = `
                 UPDATE student_course_registration 
-                SET status='Rejected'
-                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+                SET status='rejected'
+                WHERE uid="${req.body.uid}" AND offering_id="${req.body.offering_id}"
     `;
     db.conn().query(sql)
-      .then(r => res.status(200).json("course rejected"))
+    .then(r => {
+        res.status(200).json("course rejected")
+        console.log(r);
+    })
       .catch(e => {
           res.status(500).json({message: 'Unable to fetch the courses'});
           console.log(e);
       });
 };
-/**
- * This function rejects a course to register for students
- */
 
 exports.facultyCourses = (req, res) => {
 var sql = `SELECT course.code,
@@ -343,6 +344,22 @@ var sql = `SELECT course.code,
 };
 
 /**
+ * This function rejects a course to register for students
+ */
+exports.meetCourses = (req, res) => {
+    var sql = `
+                UPDATE student_course_registration 
+                SET status='Rejected'
+                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+    `;
+    db.conn().query(sql)
+      .then(r => res.status(200).json("course rejected"))
+      .catch(e => {
+          res.status(500).json({message: 'Unable to fetch the courses'});
+          console.log(e);
+      });
+};
+/**
  * For faculty to create new offering
  * @route /api/faculty/create-offering
  */
@@ -357,6 +374,13 @@ exports.createOffering = (req, res) => {
                     ("${req.body.coursecode}", "${new Date().getMonth()<6?'even': 'odd'}", "${req.body.offering_as}", ${new Date().getFullYear()}, "${req.body.remarks}")`;
 
     db.conn().query(sql)
+    .then(r => { 
+        var sql =  `INSERT INTO
+                        faculty_course_registration (offering_id, taking_as, uid)
+                    VALUES
+                        (${r.insertId}, 'Instructor Incharge', "${req.user.uid}")`;
+        return db.conn().query(sql);
+    })
     .then(r => {
         res.status(200).json(r);
         console.log(r);
@@ -393,25 +417,27 @@ exports.registerAsTutor = (req, res) => {
 /*
  * This function adds a course to register for students
  */
-
-exports.addCourses = (req, res) => {
+exports.acceptCourses = (req, res) => {
     var sql = `
                 UPDATE student_course_registration 
                 SET status='Accepted'
-                WHERE uid="${req.user.uid}" AND offering_id="${req.body.offering_id}"
+                WHERE uid="${req.body.uid}" AND offering_id="${req.body.offering_id}"
     `;
     db.conn().query(sql)
-      .then(r => res.status(200).json("course accepted"))
+      .then(r => {
+          res.status(200).json("course accepted");
+          console.log(r);
+        })
       .catch(e => {
           res.status(500).json({message: 'Unable to fetch the courses'});
           console.log(e);
       });
 };
 
-exports.currentStudents = (req, res ) => {
+exports.currentStudents = (req, res) => {
     var sql = `
             SELECT
-                student.name, student.roll_no, student.CPI, student.department
+                student.name, student.roll_no, student.CPI, student.department, course_offering.offering_id, student_course_registration.status
             FROM
                 student, course_offering, student_course_registration,
                 faculty_course_registration, faculty
@@ -421,11 +447,34 @@ exports.currentStudents = (req, res ) => {
                 student.uid = student_course_registration.uid AND
                 faculty.uid = faculty_course_registration.uid AND
                 course_offering.year = ${new Date().getFullYear()} AND
-                course_offering.half = '${new Date().getDate() < 6 ? 'even' : 'odd'}'`;
+                course_offering.half = '${new Date().getDate() < 6 ? 'even' : 'odd'}' AND
+                faculty.uid = "${req.user.uid}"`;
     db.conn().query(sql)
         .then(r => res.status(200).json(r))
         .catch(e => {
             res.status(500).json({message: 'Unable to fetch the courses'});
             console.log(e);
         });
+};
+
+exports.studentsOfCourse = (req, res) => {
+    var sql = `
+            SELECT
+                student.name, student.roll_no, student.CPI, student.department, student.uid, course_offering.offering_id, student_course_registration.status
+            FROM
+                student, course_offering, student_course_registration,
+                faculty_course_registration, faculty
+            WHERE
+                course_offering.offering_id = student_course_registration.offering_id AND
+                course_offering.offering_id = faculty_course_registration.offering_id AND
+                student.uid = student_course_registration.uid AND
+                faculty.uid = faculty_course_registration.uid AND
+                course_offering.offering_id = ${req.body.offering_id}`;
+    db.conn().query(sql)
+        .then(r => res.status(200).json(r))
+        .catch(e => {
+            res.status(500).json({message: 'Unable to fetch the courses'});
+            console.log(e);
+        });
+
 };
